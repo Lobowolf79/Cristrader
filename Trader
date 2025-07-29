@@ -1,0 +1,32 @@
+import streamlit as st
+import yfinance as yf
+import pandas_ta as ta
+
+st.title("Análisis RSI y MACD para Acciones y ETFs")
+
+tickers = {
+    "Apple": "AAPL",
+    "Amazon": "AMZN",
+    "Nvidia": "NVDA",
+    "Oro (GLD)": "GLD",
+    "Vanguard S&P 500": "VOO",
+    "iShares Core MSCI World": "IWDA",
+    "iShares Core S&P 500": "CSP1.DE",
+    "iShares Info Tech Sector": "IUIT.DE"
+}
+
+option = st.selectbox("Selecciona un activo:", list(tickers.keys()))
+symbol = tickers[option]
+
+data = yf.download(symbol, period="6mo", interval="1d")
+
+data["RSI"] = ta.rsi(data["Close"], length=14)
+macd = ta.macd(data["Close"])
+data["MACD"] = macd["MACD_12_26_9"]
+data["MACD_signal"] = macd["MACDs_12_26_9"]
+
+st.subheader(f"Gráfico de cierre y RSI para {option} ({symbol})")
+st.line_chart(data[["Close", "RSI"]])
+
+st.subheader("MACD y Señal")
+st.line_chart(data[["MACD", "MACD_signal"]])
